@@ -18,10 +18,32 @@ const getProductInfo = async (url) => {
       .getAttribute("src");
     // const inStock = html.querySelector('#ButtonPanel_buttons .pi-overflow-ctrl button').innerText !== 'Out of Stock'
     const bp_b = html.querySelector("#ButtonPanel_buttons");
-    const inStock =
-      bp_b.querySelector("#buttons_OutOfStockButton") != undefined
-        ? false
-        : true;
+    // const inStock =
+    //   bp_b.querySelector("#buttons_OutOfStockButton") != undefined
+    //     ? false
+    //     : true;
+
+    const aurl = JSON.parse(html.querySelector('.cli_findinstore_productinfo').attributes['data-productInfo'])['AvailabilityUrl']
+    const pid = JSON.parse(html.querySelector('.cli_findinstore_productinfo').attributes['data-productInfo'])['ProductId']
+    const skuid = JSON.parse(html.querySelector('.cli_findinstore_productinfo').attributes['data-productInfo'])['SkuId']
+    const availability_id = JSON.parse(html.querySelector('.cli_findinstore_skuinfo').attributes['data-skuinfo'])[skuid]['AvailabilityId']
+
+    const inv_data =await axios( {
+      method: 'post',
+      url :aurl,
+      headers: {
+        'Content-type': 'application/json',
+      },
+      data :JSON.stringify( [
+        {
+          "ProductId" : pid,
+	        "SkuId" : skuid,
+	        "AvailabilityId": availability_id
+        }
+      ])
+    })
+
+    const inStock = inv_data.data['inStock']
 
     /* TO BE IMPLEMENTED */
     return {
@@ -70,5 +92,7 @@ async function main() {
 }
 
 main();
+
+// let stockData = JSON.parse($('div.cli_findinstore_productinfo').attr('data-productinfo'));
 
 module.exports.getprodinfo = getProductInfo;
